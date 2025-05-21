@@ -56,6 +56,20 @@ def _print_counter(counter: Counter, head1: str, head2: str, sort_keys=False):
 
 # ── TODO Task 1: fill this in ───────────────────────────────────────────────
 
+def analyze_top_commands(path: str):
+    """Show most common shell commands run by bots"""
+    # regex assisted by ChatGPT: match Cowrie CMD lines
+    COMMAND_PATTERN = re.compile(r"CMD: (.+)")
+    cmd_counter = Counter()
+
+    with open(path, 'r', encoding='utf-8') as f:
+        for line in f:
+            match = COMMAND_PATTERN.search(line)
+            if match:
+                cmd_counter[match.group(1)] += 1
+
+    _print_counter(cmd_counter, "Most Common Shell Commands", "Command")
+
 def analyze_failed_logins(path: str, min_count: int):
     """Parse *failed* SSH login attempts and show a count per source IP.
 
@@ -109,7 +123,7 @@ def analyze_successful_creds(path: str):
       three‑column table (Username, Password, IP_Count).
     """
     # TODO: replace the placeholder implementation below
-    # regex assisted by ChatGPT: match successful login user/pass/ip
+       # regex assisted by ChatGPT: match successful login user/pass/ip
     SUCCESS_LOGIN_PATTERN = re.compile(r"Login success \[(.*?)\/(.*?)\] from (\d+\.\d+\.\d+\.\d+)")
     creds_map = defaultdict(set)
 
@@ -127,7 +141,6 @@ def analyze_successful_creds(path: str):
     print("--------------------------------------------")
     for (user, password), ip_set in sorted_creds:
         print(f"{user:<12} {password:<12} {len(ip_set)}")
-
 
 # ── Task 4 (bot fingerprints) already implemented ───────────────────────────
 
@@ -153,7 +166,7 @@ def main():
     parser.add_argument("--task",
                         required=True,
                         choices=["failed-logins", "connections",
-                                 "successful-creds", "identify-bots"],
+                                 "successful-creds", "identify-bots", "top-commands"],
                         help="Which analysis to run")
     parser.add_argument("--min-count", type=int, default=1,
                         help="Min events to report (failed-logins)")
@@ -167,9 +180,13 @@ def main():
         connections(args.logfile)
     elif args.task == "successful-creds":
         analyze_successful_creds(args.logfile)
+    elif args.task == "top-commands":
+         analyze_top_commands(args.logfile)
     elif args.task == "identify-bots":
         identify_bots(args.logfile, args.min_ips)
 
 
 if __name__ == "__main__":
     main()
+
+
